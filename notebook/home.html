@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion based Music recomendation System</title>
+</head>
+<body>
+
+
+    <h1>Emotion Based Music Recommendation Systems/his
+
+    <div class="container">
+        <div class="section border">
+            <h2>Upload Image</h2>
+
+        <div class="input-container">
+
+            <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)">
+
+        </div>
+
+        <div class="preview-container">
+
+        <img id="imagePreview" src="#" alt="Image Preview" style="display: none;">
+
+        </div>
+
+        <button onclick="submitImage() ">Submit</button>
+
+        <div class="spinner" id="imageSpinner">
+
+            <img src="static/spinner.gif" alt="Loading...">
+
+        </div>
+    
+        <div class="result" id="captionResult">
+        
+        <!-- Result will be displayed here-->
+        
+        </div>
+        
+    </div> 
+<script>
+        
+    function previewImage(event) {
+        var imageInput = document.getElementById('imageInput');
+        var imagePreview = document.getElementById("imagePreview");
+        imagePreview.style.display= 'block';
+        var reader = new FileReader();
+        reader.onload = function () {
+            imagePreview.src = reader.result;
+        };
+        reader.readAsDataURL (imageInput.files[0]);
+        
+    }
+        
+    function submitImage() {
+        var formData = new FormData();
+        var fileInput = document.getElementById('imageInput');
+        formData.append('file', fileInput.files[0]);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/predict', true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                var response =  JSON.parse(xhr.responseText);
+                displayResult(response);
+                } else {
+                    console.error('Error: ', xhr.status);
+                }
+            }
+        };
+        xhr.send(formData);
+    }
+    function displayResult(response) {
+        var resultContainer = document.getElementById('captionResult');
+        resultContainer.innerHTML; // Clear previous result
+        var emotionDiv = document.createElement('div');
+        emotionDiv.textContent = 'Person Emotion is:'+ response.emotion;
+        resultContainer.appendChild(emotionDiv);
+
+        var recommendations = response.recommendations;
+
+        var table =  document.createElement('table');
+        var headerRow = table.insertRow();
+        var headers = ['Album', 'Artist', 'Name', 'Popularity', 'Release Date'];
+        headers.forEach(function(headerText) {
+            var header = document.createElement('th');
+            header.textContent =  headerText;
+            headerRow.appendChild(header);
+        });
+        recommendations.forEach(function(recommendation) {
+                var row = table.insertRow();
+                var cells = ['album','artist', 'name', 'popularity', 'release_date'];
+                cells.forEach(function(cell) {
+                    var cellData = recommendation [cell];
+                    var cellèlement = document.createElement("td");
+                    cellElement.textContent = cellData;
+                    row.appendChild(cellElement);
+                });
+        });
+            resultContainer.appendChild(table);
+    }
+</script>
+</body>
+</html>
